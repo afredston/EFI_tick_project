@@ -32,24 +32,25 @@ tau.add <- ci <- list() # storage
   n <- length(y)
   
   DynamicLinearModel <- "
-    model{
+   model{
 
     #### Data Model
     for(t in 1:n){
       y[t] ~ dpois(x[t])
-      temp[t] ~ dnorm(rho[t],tau_temp[t])
+      temp[t] ~ dnorm(rho[t], tau_temp[t])
+      rho[t] ~ dnorm(rho_mu, tau_rho)
     }
 
     #### Process Model
     for(t in 2:n){
       x[t] ~ dnorm(mu[t],tau_add) T(0,)
-      mu[t] = exp(x[t-1] + beta*temp[t-1])
+      log(mu[t]) <- x[t-1] + beta*rho[t-1]
     }
 
     #### Priors
     x[1] ~ dpois(x_ic)
+    beta ~ dnorm(0, 0.01)
     tau_add ~ dgamma(a_add,r_add)
-    beta ~ dnorm(0,tau_p)
   }"
   
   data <- list(
